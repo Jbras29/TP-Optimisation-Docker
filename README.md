@@ -63,14 +63,14 @@ Le baseline mesuré avec l'image initiale est d'environ **1,365 Go**.
 
 Les valeurs suivantes doivent être complétées après chaque construction :
 
-| Étape    | Modification                                                          | Taille de l'image |               Temps de build |
-| -------- | --------------------------------------------------------------------- | ----------------: | ---------------------------: |
-| Baseline | Dockerfile initial                                                    |          1,365 Go | 21.764s (27.404s avec cache) |
-| 1        | Suppression de la copie de `node_modules` et ajout de `.dockerignore` |         à mesurer |                    à mesurer |
-| 2        | Utilisation de `npm ci --omit=dev`                                    |         à mesurer |                    à mesurer |
-| 3        | Suppression des paquets système inutiles                              |         à mesurer |                    à mesurer |
-| 4        | Utilisation d'une image Node Alpine ou Slim                           |         à mesurer |                    à mesurer |
-| 5        | Utilisateur non privilégié et nettoyage final                         |         à mesurer |                    à mesurer |
+| Étape    | Modification                                                          | Taille de l'image |                                                             Temps de build |
+| -------- | --------------------------------------------------------------------- | ----------------: | -------------------------------------------------------------------------: |
+| Baseline | Dockerfile initial                                                    |          1,365 Go |                                               21.764s (27.404s avec cache) |
+| 1        | Suppression de la copie de `node_modules` et ajout de `.dockerignore` |           1,36 Go | 43s (le temps augmente surement à cause de la connexion internet instable) |
+| 2        | Utilisation de `npm ci --omit=dev`                                    |         à mesurer |                                                                  à mesurer |
+| 3        | Suppression des paquets système inutiles                              |         à mesurer |                                                                  à mesurer |
+| 4        | Utilisation d'une image Node Alpine ou Slim                           |         à mesurer |                                                                  à mesurer |
+| 5        | Utilisateur non privilégié et nettoyage final                         |         à mesurer |                                                                  à mesurer |
 
 Commandes utiles pour les mesures :
 
