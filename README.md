@@ -127,3 +127,10 @@ La taille finale obtenue est de **0,172 Go**, avec un temps de build de **4,206 
 ### Bilan
 
 Les optimisations ont réduit l'image d'environ **1,365 Go à 0,172 Go**, soit une réduction d'environ **87 %**. L'image finale est plus légère, plus reproductible et plus sûre, tout en conservant le fonctionnement des routes existantes.
+
+## Optimisations côté application Node.js
+
+### La librairie MongoDB inutilisé est supprimé
+
+Le librairie Mongo était présente dans le fichier `package.json` alors que l'application `server.js` ne l'appelle à aucun moment.
+Cela permets aussi de faire passer le build final Docker à 4.11 secondes et de faire passer l'image à seulement 165MB.
