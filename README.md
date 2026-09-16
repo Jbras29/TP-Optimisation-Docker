@@ -134,3 +134,9 @@ Les optimisations ont réduit l'image d'environ **1,365 Go à 0,172 Go**, soit u
 
 Le librairie Mongo était présente dans le fichier `package.json` alors que l'application `server.js` ne l'appelle à aucun moment.
 Cela permets aussi de faire passer le build final Docker à 4.11 secondes et de faire passer l'image à seulement 165MB.
+
+### Lecture asynchrone du fichier
+
+La route `/big` utilisait `fs.existsSync()` puis `fs.readFileSync()`. Ces fonctions sont bloquantes : pendant leur exécution, la boucle événementielle de Node.js ne peut pas traiter correctement les autres requêtes.
+
+La lecture utilise maintenant `fs.promises.readFile()` avec `async/await`. Le serveur peut ainsi continuer à traiter d'autres opérations pendant l'accès au fichier. Pour un fichier extrêmement volumineux, un stream serait encore plus adapté, car il éviterait de charger tout le contenu en mémoire.
