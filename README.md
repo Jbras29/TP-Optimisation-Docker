@@ -70,7 +70,7 @@ Les valeurs suivantes doivent être complétées après chaque construction :
 | 2        | Utilisation de `npm ci --omit=dev`                                    |          1,355 Go |                                                                   24,324 s |
 | 3        | Suppression des paquets système inutiles                              |          1,270 Go |                                                                    9,114 s |
 | 4        | Utilisation d'une image Node Alpine légère                            |          0,175 Go |                                                                    10,27 s |
-| 5        | Utilisateur non privilégié et nettoyage final                         |         à mesurer |                                                                  à mesurer |
+| 5        | Utilisateur non privilégié et nettoyage final                         |          0,172 Go |                                                                    4,206 s |
 
 Commandes utiles pour les mesures :
 
@@ -89,3 +89,41 @@ Temps de build :
 time docker build --no-cache -t docker-opti .
 time docker build -t docker-opti .
 ```
+
+## Explication des optimisations Docker
+
+### Étape 1 : réduire le contexte Docker
+
+Dans le Dockerfile initial, le répertoire du projet était copié intégralement dans l'image. Cela pouvait inclure `node_modules`, le dossier `.git` et d'autres fichiers inutiles à l'exécution. L'ajout d'un fichier `.dockerignore` permet d'exclure ces éléments et de réduire le contexte envoyé au moteur Docker. La copie explicite de `node_modules` a également été supprimée, car les dépendances doivent être installées dans l'environnement du conteneur.
+
+Cette étape améliore la propreté de l'image et évite les problèmes liés à des dépendances installées sur un autre système ou une autre architecture. L'image reste cependant volumineuse, car elle utilise encore l'image Node Debian et conserve les paquets système de l'ancien Dockerfile.
+
+### Étape 2 : installer uniquement les dépendances de production
+
+La commande `npm install` a été remplacée par `npm ci --omit=dev`. `npm ci` s'appuie strictement sur `package-lock.json`, ce qui rend l'installation reproductible. L'option `--omit=dev` exclut les dépendances de développement, comme `nodemon`, qui ne sont pas nécessaires pour exécuter le serveur en production.
+
+Cette modification limite le contenu de `node_modules` et rend l'image plus adaptée à son usage. Le gain de taille reste modéré dans ce projet, mais la méthode est plus fiable et plus pertinente pour un projet contenant davantage de dépendances.
+
+### Étape 3 : supprimer les paquets système inutiles
+
+L'installation de `build-essential`, `ca-certificates` et `locales` a été supprimée. L'application utilise uniquement Node.js et Express et ne nécessite ni compilation native ni génération de locales pour fonctionner. Ces paquets ajoutaient une couche d'environ 85 Mo à l'image.
+
+Cette étape a réduit la taille de l'image de **1,355 Go à 1,270 Go**. Le temps de build mesuré est également passé à **9,114 s**, même si cette mesure peut varier selon le réseau et le cache Docker.
+
+### Étape 4 : utiliser une image Node Alpine
+
+L'image `node:latest` était basée sur une distribution Debian volumineuse et sa version n'était pas fixe. Elle a été remplacée par `node:22-alpine`, qui utilise une base plus légère et une version LTS explicitement choisie.
+
+Cette optimisation a eu le plus fort impact sur la taille de l'image : elle est passée de **1,270 Go à 0,175 Go**. L'image finale reste compatible avec l'application, comme le montrent les tests des routes `/` et `/big`. Le temps de build dépend davantage du téléchargement initial de l'image Alpine, ce qui explique les variations observées.
+
+### Étape 5 : sécuriser et finaliser l'image
+
+La dernière étape utilise `ENV NODE_ENV=production`, nettoie le cache npm avec `npm cache clean --force` et exécute le serveur avec `USER node` plutôt qu'avec `root`. L'utilisateur non privilégié réduit les conséquences possibles d'une vulnérabilité dans l'application.
+
+Les fichiers `package*.json` sont copiés avant `server.js`. Ainsi, Docker peut réutiliser la couche d'installation des dépendances lorsque seul le code applicatif est modifié. Le port exposé est également limité à `3000`, qui est le seul port utilisé par le serveur.
+
+La taille finale obtenue est de **0,172 Go**, avec un temps de build de **4,206 s**. L'image démarre correctement, `nodemon` n'est pas installé et le serveur fonctionne avec l'utilisateur `node`.
+
+### Bilan
+
+Les optimisations ont réduit l'image d'environ **1,365 Go à 0,172 Go**, soit une réduction d'environ **87 %**. L'image finale est plus légère, plus reproductible et plus sûre, tout en conservant le fonctionnement des routes existantes.
