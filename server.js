@@ -6,11 +6,12 @@ const path = require('path');
 const app = express();
 
 
-// Middleware verbeux et un peu inutile
+if (process.env.NODE_ENV !== 'production') {
 app.use((req, res, next) => {
 console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
 next();
 });
+}
 
 
 app.get('/', (req, res) => {

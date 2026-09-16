@@ -146,3 +146,7 @@ La lecture utilise maintenant `fs.promises.readFile()` avec `async/await`. Le se
 Lorsque `maybe-big-file.txt` n'existe pas, la route renvoie maintenant le statut **404 Not Found** au lieu d'un statut `200`. Les erreurs de lecture inattendues sont transmises au middleware d'erreur Express et renvoient **500 Internal Server Error**.
 
 Cette distinction permet à un client de différencier une ressource absente d'une erreur interne du serveur.
+
+### Logging conditionnel
+
+Le middleware de logging détaillé est maintenant activé uniquement lorsque `NODE_ENV` n'est pas égal à `production`. Il reste disponible pour le développement, mais n'ajoute pas de sortie inutile pour chaque requête dans l'image finale, qui utilise `NODE_ENV=production`.
