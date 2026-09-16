@@ -18,14 +18,23 @@ res.send('Hello world — serveur volontairement non optimisé mais fonctionnel'
 });
 
 
-app.get('/big', async (req, res) => {
+app.get('/big', async (req, res, next) => {
 const filePath = path.join(__dirname, 'maybe-big-file.txt');
 try {
 const data = await fs.promises.readFile(filePath, 'utf8');
 res.send(data.replace(/\n/g, '<br/>'));
 } catch (error) {
-res.send('Fichier introuvable');
+if (error.code === 'ENOENT') {
+return res.status(404).send('Fichier introuvable');
 }
+
+next(error);
+}
+});
+
+app.use((error, req, res, next) => {
+console.error(error);
+res.status(500).send('Erreur serveur');
 });
 
 
