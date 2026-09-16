@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:22-alpine
 WORKDIR /app
 COPY . /app
 RUN npm ci --omit=dev

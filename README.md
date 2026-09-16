@@ -69,7 +69,7 @@ Les valeurs suivantes doivent être complétées après chaque construction :
 | 1        | Suppression de la copie de `node_modules` et ajout de `.dockerignore` |           1,36 Go | 43s (le temps augmente surement à cause de la connexion internet instable) |
 | 2        | Utilisation de `npm ci --omit=dev`                                    |          1,355 Go |                                                                   24,324 s |
 | 3        | Suppression des paquets système inutiles                              |          1,270 Go |                                                                    9,114 s |
-| 4        | Utilisation d'une image Node Alpine ou Slim                           |         à mesurer |                                                                  à mesurer |
+| 4        | Utilisation d'une image Node Alpine légère                            |          0,175 Go |                                                                    10,27 s |
 | 5        | Utilisateur non privilégié et nettoyage final                         |         à mesurer |                                                                  à mesurer |
 
 Commandes utiles pour les mesures :
